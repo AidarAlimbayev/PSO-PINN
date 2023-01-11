@@ -7,8 +7,12 @@ import math
 import swarm.optimizers as optimizers
 from swarm.utils import multilayer_perceptron, decode, replacenan
 
+global a_prev 
+a_prev = 0
+
 np.random.seed(123456)
 tf.random.set_seed(123456)
+ 
 
 uxn = 256 + 2
 xlo = 0
@@ -18,14 +22,25 @@ ux = tf.reshape(
     tf.Variable(np.linspace(xlo, xhi, uxn), dtype="float32"), [uxn, 1]
 )
 
+print("ux :", ux)
+
 u = tf.sin(2 * math.pi * ux)
+
+print("u :", u)
 
 x0 = tf.reshape(tf.convert_to_tensor(xlo, dtype=tf.float32), [1, 1])
 x1 = tf.reshape(tf.convert_to_tensor(xhi, dtype=tf.float32), [1, 1])
 u0 = tf.reshape(tf.convert_to_tensor(u[0], dtype=tf.float32), [1, 1])
 u1 = tf.reshape(tf.convert_to_tensor(u[-1], dtype=tf.float32), [1, 1])
 
+print("x0 :", x0)
+print("x1 :", x1)
+print("u0 :", u0)
+print("u1 :", u1)
+
 layer_sizes = [1] + 3 * [10] + [1]
+
+print("layer_sizes :", layer_sizes)
 pop_size = 100
 n_iter = 30
 stepInd = 0.01

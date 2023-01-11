@@ -1,6 +1,11 @@
 import tensorflow as tf
 import tensorflow_probability as tfp
+import numpy as np
 from swarm import utils
+
+global a_prev 
+a_prev = 0
+
 
 
 def dimensions(layers):
@@ -102,6 +107,9 @@ def decode(encoded, layers):
         biases.append(b)
     return weights, biases
 
+def softmax(vector):
+	e = np.exp(vector)
+	return e / e.sum()
 
 def multilayer_perceptron(weights, biases, X, x_min=-1, x_max=1):
     """It runs the multilayer perceptron neural network. Given the weights and biases representing the neural net and the input population `X`.
@@ -116,6 +124,8 @@ def multilayer_perceptron(weights, biases, X, x_min=-1, x_max=1):
     Returns:
         tf.Tensor: The prediction `Y`.
     """
+
+
     num_layers = len(weights) + 1
     H = 2.0 * (X - x_min) / (x_max - x_min) - 1.0
     for l in range(0, num_layers - 2):
@@ -125,7 +135,23 @@ def multilayer_perceptron(weights, biases, X, x_min=-1, x_max=1):
     W = weights[-1]
     b = biases[-1]
     Y = tf.add(tf.matmul(H, W), b)
+    
     return Y
+
+def rnn_cell_forward(weights, biases, xt):
+    #print("a_prev :", a_prev)
+    first_flag = 0
+    if first_flag == 0:
+        a_next = tf.math.tanh(tf.keras.layers.Dot(axes = (1,2)(weights, first_flag)) + tf.keras.layers.Dot(axes = (1,2)(weights, xt) + biases))
+    else:
+        a_next = tf.math.tanh(tf.keras.layers.Dot(axes = (1,2)(weights, a_prev)) + tf.keras.layers.Dot(axes = (1,2)(weights, xt) + biases)) # compute next activation state
+    yt_pred = softmax(tf.keras.layers.Dot(axes = (1,2)(weights, a_next)) + biases) # compute output of the current cell
+    print("yt_pred :", yt_pred)
+    print("yt_pred type", yt_pred.type())
+    #cache = (a_next, a_prev, xt) # store values you need for backward propagation in cache
+    a_prev = a_next
+    first_flag = 1
+    return yt_pred
 
 
 def replacenan(t):
@@ -147,7 +173,28 @@ def layer_init(size, method):
         size (int): The layer size.
 
     Returns:
-        tf.Tensor: The weights for the layer.
+        tf.Tensor: The weights for the layer.def train_step():
+    with tf.GradientTape() as tape:
+        loss = custom_loss()
+    trainable_variables = list(weights.values())+list(biases.values())
+    print("--------------------------")
+    print("loss :", loss)
+    print("trainable_vairables :", trainable_variables)
+
+    gradients = tape.gradient(loss, trainable_variables)
+    print("------------------------")
+        
+    print("--------------------------")
+    print("weights :", weights)
+    
+    print("--------------------------")
+    print("biases :", biases)
+
+    print("--------------------------")
+    print("gradients :", gradients)
+    print("--------------------------")
+    optimizer.apply_gradients(zip(gradients, trainable_variables))
+
     """
     in_dim = size[0]
     out_dim = size[1]
